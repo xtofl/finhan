@@ -22,7 +22,8 @@ def transactions(path: Path):
                   #day_first=True,
                   engine='python' # cf. https://github.com/pandas-dev/pandas/issues/33699#event-4105125638
                   )
-    return ts['Transactie datum', 'Bedrag van de verrichting']
+    return ts['Transactie datum'], ts['Bedrag van de verrichting']
+
 
 def clean_data(path):
     cleaned, dirties = map(Path, ('clean.prep', 'dirty.prep'))
@@ -36,15 +37,15 @@ def clean_data(path):
     return cleaned, dirties
 
 
-def plot(what):
-    return pyplot.plot_date(what, what)
+def plot(dates, numbers):
+    return pyplot.plot_date(dates, numbers)
 
 
 def main():
     parser = ArgumentParser()
     parser.add_argument('data_path', type=str)
     options = parser.parse_args()
-    plot(transactions(Path(options.data_path)))
+    plot(*transactions(Path(options.data_path)))
     pyplot.show()
 
 
