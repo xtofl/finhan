@@ -3,41 +3,12 @@ from argparse import ArgumentParser
 import numpy as np
 from matplotlib import pyplot
 from pandas import read_csv
+import adapters.bepost
 
 
-def bepost_format_choose(line, dirty, clean):
-    if 'ancontact' in line:
-        return dirty
-
-    return clean
-
-
-def transactions(path: Path):
-    cleaned, dirty = clean_data(path)
-
-    ts = read_csv(cleaned,
-                  delimiter=';', decimal=',',
-                  header=1,
-                  parse_dates=['Transactie datum', 'Valuta datum'],
-                  #day_first=True,
-                  engine='python' # cf. https://github.com/pandas-dev/pandas/issues/33699#event-4105125638
-                  )
-    return ts['Transactie datum'], ts['Bedrag van de verrichting']
-
-
-def clean_data(path):
-    cleaned, dirties = map(Path, ('clean.prep', 'dirty.prep'))
-    with path.open('r') as p, cleaned.open('w') as c, dirties.open('w') as d:
-        for i, line in enumerate(p.readlines()):
-            target = bepost_format_choose(line, d, c)
-            if target is d:
-                target.write(f'line {i}: {line}')
-            else:
-                target.write(line)
-    return cleaned, dirties
-
-
-def plot(dates, numbers):
+def plot(dates, numbers ):
+    print(dates[:10])
+    print(numbers[:10])
     return pyplot.plot_date(dates, numbers)
 
 
@@ -45,7 +16,12 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('data_path', type=str)
     options = parser.parse_args()
-    plot(*transactions(Path(options.data_path)))
+
+    with Path(options.data_path).open() as f:
+        transactions = tuple(adapters.bepost.from_lines(f.readlines()))
+        dates = tuple(t.date for t in transactions)
+        numbers = tuple(t.amount for t in transactions)
+        plot(dates, numbers)
     pyplot.show()
 
 
