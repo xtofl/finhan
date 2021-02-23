@@ -76,7 +76,7 @@ def _transactions(lines: Iterable[str]):
     return map(parser, filter(lambda n: len(n) > 2, reader))
 
 
-def from_lines(lines: Iterable[str]):
+def from_lines(lines: Iterable[str]) -> Iterable[Transaction]:
     return _transactions(lines)
 
 
