@@ -69,6 +69,8 @@ def _transactions(lines: Iterable[str]):
         'Overschrijving in uw voordeel': regular,
         'Kosten- en interestberekening': regular,
         'Maestro-betaling': regular,
+        'Rekeningverzekering': regular,
+        'Overschr. (met getrouwheidspr.)': regular,
         'Opneming Bancontact': _parser_for_bancontact_opneming(account),
         'Bancontact-betaling': _parser_for_bancontact_betaling(account),
         }
