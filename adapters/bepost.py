@@ -3,7 +3,7 @@ import locale
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable, Collection
+from typing import Iterable, Collection, Tuple
 
 
 @dataclass
@@ -57,7 +57,10 @@ def _try_all(functions: dict):
     return combined
 
 
-def _transactions(lines: Iterable[str]):
+Account = str
+
+
+def _transactions(lines: Iterable[str]) -> Tuple[Iterable[Transaction], Account]:
     reader = csv.reader(lines, delimiter=';')
     it = iter(reader)
     account = _account(row=next(it))
@@ -75,10 +78,10 @@ def _transactions(lines: Iterable[str]):
         'Bancontact-betaling': _parser_for_bancontact_betaling(account),
         }
     )
-    return map(parser, filter(lambda n: len(n) > 2, reader))
+    return map(parser, filter(lambda n: len(n) > 2, reader)), account
 
 
-def from_lines(lines: Iterable[str]) -> Iterable[Transaction]:
+def from_lines(lines: Iterable[str]) -> Tuple[Iterable[Transaction], Account]:
     return _transactions(lines)
 
 
