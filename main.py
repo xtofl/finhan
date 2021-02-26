@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from datetime import timedelta
-from itertools import chain
+from functools import reduce
+from itertools import chain, starmap
 from pathlib import Path
 from argparse import ArgumentParser
 from typing import Iterator, Iterable
@@ -32,10 +33,10 @@ def unix_timestamps(dates):
     return dates_t
 
 
-def plot(dates, numbers):
-    cumulative = np.cumsum(numbers)
-    pyplot.plot_date(dates, numbers, label='transacties')
-    pyplot.plot_date(dates, cumulative, label='saldo')
+def plot(dates, numbers, account, current_balance):
+    cumulative = np.cumsum(numbers) + current_balance
+    pyplot.plot_date(dates, numbers, label=account)
+    pyplot.plot_date(dates, cumulative, label=f'saldo {account}')
     pyplot.legend()
 
 
@@ -50,17 +51,47 @@ def main():
     options = parser.parse_args()
 
     line_lists = map(read_lines, options.data_path)
-    transaction_lists = map(adapters.bepost.from_lines, line_lists)
+    transaction_lists = tuple(map(adapters.bepost.from_lines, line_lists))
 
-    transactions = sorted(
-        chain(*transaction_lists),
-        key=lambda t: t.date,
-        reverse=True)
+    transaction_lists = tuple(
+        starmap(
+            lambda ts, account: (
+                tuple(sorted(
+                    ts,
+                    key=lambda t: t.date,
+                    reverse=True)), account),
+            transaction_lists
+        )
+    )
 
+    accounts = tuple(account for _, account in transaction_lists)
+
+    def for_account(account):
+        return (t for t, a in transaction_lists if a == account)
+
+    def join_transactions(t, other):
+        return tuple(t) + tuple(other)
+
+    transactions_by_account = {
+        account: reduce(join_transactions, for_account(account), tuple())
+        for account in accounts
+    }
+    current_balance = {
+    }
+    for account, transactions in transactions_by_account.items():
+        plot_for_account(account,
+                         current_balance.get(account, None),
+                         transactions)
+    pyplot.show()
+
+
+def plot_for_account(account, current_balance, transactions):
     dates = tuple(t.date for t in transactions)
     numbers = tuple(t.amount for t in transactions)
-    plot(dates, numbers)
-    pyplot.show()
+    plot(
+        dates, numbers,
+        account,
+        current_balance=current_balance)
 
 
 main()
