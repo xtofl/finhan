@@ -34,9 +34,9 @@ def unix_timestamps(dates):
 
 
 def plot(dates, numbers, account, current_balance):
-    cumulative = np.cumsum(numbers) + current_balance
+    cumulative = np.cumsum(numbers) + (current_balance or 0)
     pyplot.plot_date(dates, numbers, label=account)
-    pyplot.plot_date(dates, cumulative, label=f'saldo {account}')
+    pyplot.plot_date(dates, cumulative, '+', label=f'saldo {account}')
     pyplot.legend()
 
 
@@ -48,6 +48,10 @@ def read_lines(filename: str) -> Iterator[str]:
 def main():
     parser = ArgumentParser()
     parser.add_argument('data_path', type=str, nargs='*')
+    parser.add_argument(
+        '--balance', type=str, nargs='*',
+        help='List of pairs in the form <account>:<balance> '
+             'e.g. --balance BE123456789:-400.6 BE654654654:10021.50')
     options = parser.parse_args()
 
     line_lists = map(read_lines, options.data_path)
@@ -77,6 +81,7 @@ def main():
         for account in accounts
     }
     current_balance = {
+        a: float(b) for a, b in (x.split(':') for x in options.balance)
     }
     for account, transactions in transactions_by_account.items():
         plot_for_account(account,
