@@ -4,10 +4,15 @@ version = "0.1.0"
 description = "Financial Projection for individuals and households"
 authors = ["xtofl"]
 license = "LGPL"
+packages = [
+    { include = "finhan", from ="src" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 matplotlib = "^3.3.4"
+numpy = "^1.20.1"
+PyYAML = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
 
