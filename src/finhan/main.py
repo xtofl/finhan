@@ -35,13 +35,11 @@ def unix_timestamps(dates):
     return dates_t
 
 
-def plot(dates, numbers, account, current_balance):
+def balance(current_balance, numbers):
     saldo_floating = np.cumsum(numbers)
     last_floating_saldo = saldo_floating[-1]
     saldo = saldo_floating + (current_balance - last_floating_saldo)
-    pyplot.plot_date(dates, numbers, label=account)
-    pyplot.plot_date(dates, saldo, '-+', label=f'saldo {account}')
-    pyplot.legend()
+    return saldo
 
 
 def read_lines(filename: str) -> Iterator[str]:
@@ -94,6 +92,7 @@ def main():
         plot_for_account(account,
                          current_balance.get(account, None),
                          transactions)
+    pyplot.legend()
     pyplot.show()
 
 
@@ -104,10 +103,10 @@ def plot_for_account(account, current_balance, transactions):
                     reverse=True)
     dates = tuple(t.date for t in transactions)
     numbers = tuple(t.amount for t in transactions)
-    plot(
-        dates, numbers,
-        account,
-        current_balance=current_balance)
+
+    saldo = balance(current_balance, numbers)
+    pyplot.plot_date(dates, numbers, label=account)
+    pyplot.plot_date(dates, saldo, '-+', label=f'saldo {account}')
 
 
 main()
