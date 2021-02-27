@@ -14,6 +14,50 @@ from numpy.polynomial import polynomial
 from finhan.account import read_balance
 
 
+def main():
+    parser = ArgumentParser()
+    parser.add_argument('data_path', type=str, nargs='*')
+    parser.add_argument(
+        '--balance', type=Path,
+        help='Path to current balance file.  This file should contain a '
+             'dict of account -> balance')
+
+    options = parser.parse_args()
+
+    current_balance, transactions_by_account =\
+        read_account_transactions(options)
+    plot_each_account(current_balance, transactions_by_account)
+    pyplot.legend()
+    pyplot.show()
+
+
+def read_account_transactions(options):
+    line_lists = map(read_lines, options.data_path)
+    transaction_lists = tuple(map(bepost.from_lines,
+                                  line_lists))
+    transaction_lists = tuple(
+        starmap(
+            lambda ts, account: (
+                tuple(ts), account),
+            transaction_lists
+        )
+    )
+    accounts = tuple(account for _, account in transaction_lists)
+
+    def for_account(account):
+        return (t for t, a in transaction_lists if a == account)
+
+    def join_transactions(t, other):
+        return tuple(t) + tuple(other)
+
+    transactions_by_account = {
+        account: reduce(join_transactions, for_account(account), tuple())
+        for account in accounts
+    }
+    current_balance = read_balance(options.balance)
+    return current_balance, transactions_by_account
+
+
 def trend(dates, cumulative, label):
     dates_u = unix_timestamps(dates)
     p = polynomial.polyfit(dates_u, cumulative, 1)
@@ -47,53 +91,11 @@ def read_lines(filename: str) -> Iterator[str]:
         return f.readlines()
 
 
-class Balance:
-    '''convert cmdline argument to balance'''
-    def __init__(self, b: str):
-        return b.split(':')
-
-
-def main():
-    parser = ArgumentParser()
-    parser.add_argument('data_path', type=str, nargs='*')
-    parser.add_argument(
-        '--balance', type=Path,
-        help='Path to current balance file.  This file should contain a '
-             'dict of account -> balance')
-
-    options = parser.parse_args()
-
-    line_lists = map(read_lines, options.data_path)
-    transaction_lists = tuple(map(bepost.from_lines,
-                                  line_lists))
-
-    transaction_lists = tuple(
-        starmap(
-            lambda ts, account: (
-                tuple(ts), account),
-            transaction_lists
-        )
-    )
-
-    accounts = tuple(account for _, account in transaction_lists)
-
-    def for_account(account):
-        return (t for t, a in transaction_lists if a == account)
-
-    def join_transactions(t, other):
-        return tuple(t) + tuple(other)
-
-    transactions_by_account = {
-        account: reduce(join_transactions, for_account(account), tuple())
-        for account in accounts
-    }
-    current_balance = read_balance(options.balance)
+def plot_each_account(current_balance, transactions_by_account):
     for account, transactions in transactions_by_account.items():
         plot_for_account(account,
                          current_balance.get(account, None),
                          transactions)
-    pyplot.legend()
-    pyplot.show()
 
 
 def plot_for_account(account, current_balance, transactions):
