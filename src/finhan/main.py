@@ -36,9 +36,11 @@ def unix_timestamps(dates):
 
 
 def plot(dates, numbers, account, current_balance):
-    cumulative = np.cumsum(numbers) + (current_balance or 0)
+    saldo_floating = np.cumsum(numbers)
+    last_floating_saldo = saldo_floating[-1]
+    saldo = saldo_floating + (current_balance - last_floating_saldo)
     pyplot.plot_date(dates, numbers, label=account)
-    pyplot.plot_date(dates, cumulative, '-+', label=f'saldo {account}')
+    pyplot.plot_date(dates, saldo, '-+', label=f'saldo {account}')
     pyplot.legend()
 
 
