@@ -16,7 +16,7 @@ from finhan.account import read_balance
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('data_path', type=str, nargs='*')
+    parser.add_argument('data_paths', type=str, nargs='*')
     parser.add_argument(
         '--balance', type=Path,
         help='Path to current balance file.  This file should contain a '
@@ -24,15 +24,15 @@ def main():
 
     options = parser.parse_args()
 
-    current_balance, transactions_by_account =\
-        read_account_transactions(options)
+    current_balance = read_balance(options.balance)
+    transactions_by_account = read_account_transactions(options.data_paths)
     plot_each_account(current_balance, transactions_by_account)
     pyplot.legend()
     pyplot.show()
 
 
-def read_account_transactions(options):
-    line_lists = map(read_lines, options.data_path)
+def read_account_transactions(data_paths):
+    line_lists = map(read_lines, data_paths)
     transaction_lists = tuple(map(bepost.from_lines,
                                   line_lists))
     transaction_lists = tuple(
@@ -54,8 +54,7 @@ def read_account_transactions(options):
         account: reduce(join_transactions, for_account(account), tuple())
         for account in accounts
     }
-    current_balance = read_balance(options.balance)
-    return current_balance, transactions_by_account
+    return transactions_by_account
 
 
 def trend(dates, cumulative, label):
