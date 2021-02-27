@@ -8,6 +8,8 @@ from typing import Iterator, Iterable
 
 import numpy as np
 from matplotlib import pyplot
+from matplotlib.lines import Line2D
+
 import finhan.adapters.bepost as bepost
 from numpy.polynomial import polynomial
 
@@ -119,8 +121,9 @@ def plot_for_account(account, current_balance, transactions):
     dates, numbers = dates_and_numbers(transactions)
 
     saldo = balance(current_balance, numbers)
-    pyplot.plot_date(dates, numbers, label=account)
-    pyplot.plot_date(dates, saldo, '-+', label=f'saldo {account}')
+    line: Line2D = pyplot.plot_date(dates, numbers, label=account)[0]
+    pyplot.plot_date(dates, saldo, '-', color=line.get_color(),
+                     label=f'saldo {account}')
 
 
 def dates_and_numbers(transactions):
