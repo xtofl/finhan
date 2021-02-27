@@ -14,6 +14,23 @@ from numpy.polynomial import polynomial
 from finhan.account import read_balance
 
 
+def plot_grand_total(current_balance, transactions_by_account):
+    transactions_by_date = sorted(tuple(
+        chain(*transactions_by_account.values())
+    ), key=lambda t: t.date)
+
+    all_transactions = np.fromiter(
+        (t.amount for t in transactions_by_date),
+        dtype=float
+    )
+    floating_grand_total = np.cumsum(all_transactions)
+    last = floating_grand_total[-1]
+    grand_current_balance = sum(current_balance.values())
+    grand_total = floating_grand_total + (grand_current_balance - last)
+    dates = tuple(t.date for t in transactions_by_date)
+    pyplot.plot_date(dates, grand_total, '-', label=f'GRAND TOTAL')
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('data_paths', type=str, nargs='*')
@@ -27,6 +44,7 @@ def main():
     current_balance = read_balance(options.balance)
     transactions_by_account = read_account_transactions(options.data_paths)
     plot_each_account(current_balance, transactions_by_account)
+    plot_grand_total(current_balance, transactions_by_account)
     pyplot.legend()
     pyplot.show()
 
@@ -98,16 +116,21 @@ def plot_each_account(current_balance, transactions_by_account):
 
 
 def plot_for_account(account, current_balance, transactions):
-    transactions = sorted(
-                    transactions,
-                    key=lambda t: t.date,
-                    reverse=True)
-    dates = tuple(t.date for t in transactions)
-    numbers = tuple(t.amount for t in transactions)
+    dates, numbers = dates_and_numbers(transactions)
 
     saldo = balance(current_balance, numbers)
     pyplot.plot_date(dates, numbers, label=account)
     pyplot.plot_date(dates, saldo, '-+', label=f'saldo {account}')
+
+
+def dates_and_numbers(transactions):
+    transactions = sorted(
+        transactions,
+        key=lambda t: t.date,
+        reverse=True)
+    dates = tuple(t.date for t in transactions)
+    numbers = tuple(t.amount for t in transactions)
+    return dates, numbers
 
 
 main()
