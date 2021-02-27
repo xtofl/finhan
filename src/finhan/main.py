@@ -8,8 +8,10 @@ from typing import Iterator, Iterable
 
 import numpy as np
 from matplotlib import pyplot
-import adapters.bepost
+import finhan.adapters.bepost as bepost
 from numpy.polynomial import polynomial
+
+from finhan.account import read_balance
 
 
 def trend(dates, cumulative, label):
@@ -36,7 +38,7 @@ def unix_timestamps(dates):
 def plot(dates, numbers, account, current_balance):
     cumulative = np.cumsum(numbers) + (current_balance or 0)
     pyplot.plot_date(dates, numbers, label=account)
-    pyplot.plot_date(dates, cumulative, '+', label=f'saldo {account}')
+    pyplot.plot_date(dates, cumulative, '-+', label=f'saldo {account}')
     pyplot.legend()
 
 
@@ -45,25 +47,30 @@ def read_lines(filename: str) -> Iterator[str]:
         return f.readlines()
 
 
+class Balance:
+    '''convert cmdline argument to balance'''
+    def __init__(self, b: str):
+        return b.split(':')
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('data_path', type=str, nargs='*')
     parser.add_argument(
-        '--balance', type=str, nargs='*',
-        help='List of pairs in the form <account>:<balance> '
-             'e.g. --balance BE123456789:-400.6 BE654654654:10021.50')
+        '--balance', type=Path,
+        help='Path to current balance file.  This file should contain a '
+             'dict of account -> balance')
+
     options = parser.parse_args()
 
     line_lists = map(read_lines, options.data_path)
-    transaction_lists = tuple(map(adapters.bepost.from_lines, line_lists))
+    transaction_lists = tuple(map(bepost.from_lines,
+                                  line_lists))
 
     transaction_lists = tuple(
         starmap(
             lambda ts, account: (
-                tuple(sorted(
-                    ts,
-                    key=lambda t: t.date,
-                    reverse=True)), account),
+                tuple(ts), account),
             transaction_lists
         )
     )
@@ -80,9 +87,7 @@ def main():
         account: reduce(join_transactions, for_account(account), tuple())
         for account in accounts
     }
-    current_balance = {
-        a: float(b) for a, b in (x.split(':') for x in options.balance)
-    }
+    current_balance = read_balance(options.balance)
     for account, transactions in transactions_by_account.items():
         plot_for_account(account,
                          current_balance.get(account, None),
@@ -91,6 +96,10 @@ def main():
 
 
 def plot_for_account(account, current_balance, transactions):
+    transactions = sorted(
+                    transactions,
+                    key=lambda t: t.date,
+                    reverse=True)
     dates = tuple(t.date for t in transactions)
     numbers = tuple(t.amount for t in transactions)
     plot(
