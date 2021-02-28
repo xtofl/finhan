@@ -1,7 +1,7 @@
 import csv
 import locale
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 from datetime import datetime
 from typing import Iterable, Collection, Tuple
 
@@ -12,6 +12,9 @@ class Transaction:
     source: str
     target: str
     amount: float
+
+    def __hash__(self):
+        return hash(astuple(self))
 
 
 def bepost_format_choose(line, dirty, clean):
