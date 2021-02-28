@@ -31,14 +31,13 @@ def test_bancontact_records_are_parsed_separately():
         'Nummer van de verrichting;Transactie datum;Beschrijving;Bedrag van de verrichting;Munt;Valuta datum;Rekening tegenpartij :;Naam tegenpartij;Mededeling;Referentie van de verrichting',
     ]
     bancontact_sample = '75;2020-04-06;Opneming Bancontact;-80;EUR;06/04/2020; ;B0456A78        WHEREEVER;20200404 14:59:04 ; Carte/Kaart : 0505050505050 ;TermID : B0456A78;C0D06AG03V0001VY;'
-    bancontact_row = bancontact_sample.split(';')
     lines = preamble + [bancontact_sample]
-    bancontact_record: Transaction = next(from_lines(lines))
+    bancontact_record: Transaction = next(from_lines(lines)[0])
     assert bancontact_record.source == 'account'
 
 
 def test_columns_are_well_read(sample):
-    transactions = tuple(from_lines(sample.split('\n')))
+    transactions, account = from_lines(sample.split('\n'))
     expected = (
         Transaction(
             date=datetime(year=2021, month=1, day=18),
@@ -54,4 +53,4 @@ def test_columns_are_well_read(sample):
         ),
     )
 
-    assert all(e in transactions for e in expected)
+    assert set(expected) < set(transactions)
