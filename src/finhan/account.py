@@ -1,8 +1,8 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from functools import reduce
-from itertools import starmap, chain
+from itertools import starmap, chain, groupby
 from pathlib import Path
-from typing import Dict, Iterator
+from typing import Dict, Iterator, Collection, Tuple
 
 import numpy as np
 import yaml
@@ -78,20 +78,20 @@ def dates_and_numbers(transactions):
     return dates, numbers
 
 
-def joint_account_transactions(current_balance, transactions_by_account):
+def joint_account_transactions(current_balance, transactions_by_account)\
+        -> Tuple[Collection[datetime], Collection[Balance]]:
+    get_date = lambda t: t.date
     transactions_by_date = sorted(tuple(
         chain(*transactions_by_account.values())
-    ), key=lambda t: t.date)
-    all_transactions = np.fromiter(
-        (t.amount for t in transactions_by_date),
-        dtype=float
-    )
-    floating_grand_total = np.cumsum(all_transactions)
-    last = floating_grand_total[-1]
-    grand_current_balance = sum(current_balance.values())
-    grand_total = floating_grand_total + (grand_current_balance - last)
-    dates = tuple(t.date for t in transactions_by_date)
-    return dates, grand_total
+    ), key=get_date)
+    total = 0
+    joint = []
+    for date, transactions in groupby(transactions_by_date, get_date):
+        total = total + sum(t.amount for t in transactions)
+        joint.append(total)
+    joint_current_balance = sum(current_balance.values())
+    return sorted(set(t.date for t in transactions_by_date)),\
+           np.array(joint) - joint[-1] + joint_current_balance
 
 
 def read_lines(filename: str) -> Iterator[str]:
