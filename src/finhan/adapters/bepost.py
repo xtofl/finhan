@@ -3,7 +3,7 @@ import locale
 from contextlib import contextmanager
 from dataclasses import dataclass, astuple
 from datetime import datetime
-from typing import Iterable, Collection, Tuple
+from typing import Iterable, Sequence, Tuple
 
 
 @dataclass
@@ -24,7 +24,7 @@ def bepost_format_choose(line, dirty, clean):
     return clean
 
 
-def _account(row: Collection[str]):
+def _account(row: Sequence[str]):
     return row[1]
 
 
@@ -32,7 +32,7 @@ def parse_date(s):
     return datetime.strptime(s, '%Y-%m-%d')
 
 
-def _regular_parser(account, header_row: Collection[str]):
+def _regular_parser(account, header_row: Sequence[str]):
     def index_of(s):
         return next(i for i, n in enumerate(header_row) if n == s)
 
@@ -43,7 +43,7 @@ def _regular_parser(account, header_row: Collection[str]):
     amount = extract(_belgian_float, index_of('Bedrag van de verrichting'))
     date = extract(parse_date, index_of('Transactie datum'))
 
-    def f(row: Collection[str]):
+    def f(row: Sequence[str]):
         return Transaction(
                 source=account,
                 target=target(row),
@@ -54,7 +54,7 @@ def _regular_parser(account, header_row: Collection[str]):
 
 
 def _try_all(functions: dict):
-    def combined(row: Collection[str]):
+    def combined(row: Sequence[str]):
         key = row[2]
         return functions[key](row)
     return combined
