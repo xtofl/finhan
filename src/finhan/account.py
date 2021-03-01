@@ -80,7 +80,10 @@ def dates_and_numbers(transactions):
 
 def joint_account_transactions(current_balance, transactions_by_account)\
         -> Tuple[Collection[datetime], Collection[Balance]]:
-    get_date = lambda t: t.date
+
+    def get_date(transaction):
+        return transaction.date
+
     transactions_by_date = sorted(tuple(
         chain(*transactions_by_account.values())
     ), key=get_date)
