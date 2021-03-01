@@ -17,7 +17,6 @@ def read_balance(filename: Path) -> Dict[AccountId, Balance]:
     with filename.open() as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
     assert config['schema'] == 'v1'
-    date = config['last updated']
     accounts = config['accounts']
     return {AccountId(a['id']): Balance(a['balance']) for a in accounts}
 
