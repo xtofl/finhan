@@ -30,3 +30,6 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v1.5
         with:
           projectBaseDir: src
+        env:
+          SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
