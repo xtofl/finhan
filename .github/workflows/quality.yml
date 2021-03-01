@@ -32,7 +32,7 @@ jobs:
           projectBaseDir: src
           args: >
             -Dsonar.organization=xtofl
-            -Dsonar.projectkey=xtofl_finhan
+            -Dsonar.projectKey=xtofl_finhan
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
