@@ -12,7 +12,8 @@ from finhan.account import read_balance, read_account_transactions, apply_balanc
 def plot_grand_total(current_balance, transactions_by_account):
     dates, grand_total = joint_account_transactions(current_balance,
                                                     transactions_by_account)
-    pyplot.plot_date(dates, grand_total, '-', label=f'GRAND TOTAL')
+    pyplot.plot_date(dates, grand_total, '-', label=f'GRAND TOTAL',
+                     linewidth=4)
 
 
 def main():
