@@ -23,32 +23,44 @@ def main():
         '--balance', type=Path,
         help='Path to current balance file.  This file should contain a '
              'dict of account -> balance')
+    parser.add_argument(
+        '--show_transactions', action='store_true',
+        help='plot each transaction, too')
 
     options = parser.parse_args()
 
     current_balance = read_balance(options.balance)
+    print(current_balance)
     transactions_by_account = read_account_transactions(options.data_paths)
-    plot_each_account(current_balance, transactions_by_account)
+    plot_each_account(current_balance, transactions_by_account,
+                      show_transactions=options.show_transactions)
     plot_grand_total(current_balance, transactions_by_account)
     pyplot.grid()
     pyplot.legend()
     pyplot.show()
 
 
-def plot_each_account(current_balance, transactions_by_account):
+def plot_each_account(current_balance, transactions_by_account,
+                      show_transactions: bool):
     for account, transactions in transactions_by_account.items():
         plot_for_account(account,
                          current_balance.get(account, None),
-                         transactions)
+                         transactions,
+                         show_transactions)
 
 
-def plot_for_account(account, current_balance, transactions):
+def plot_for_account(account, current_balance, transactions, show_transactions):
     dates, numbers = dates_and_numbers(transactions)
 
     balance = apply_balance(current_balance, numbers)
-    line: Line2D = pyplot.plot_date(dates, numbers, label=account)[0]
-    pyplot.plot_date(dates, balance, '-x', color=line.get_color(),
-                     label=f'balance {account}')
+    print(f'plotting for account {account} (end balance '
+          f'{balance[-1]} == {current_balance}')
+    line: Line2D = pyplot.plot_date(
+        dates, balance, '-',
+        label=f'balance {account}')[0]
+    if show_transactions:
+        pyplot.plot_date(dates, numbers, '+', label=account,
+                         color=line.get_color())
 
 
 if __name__ == '__main__':
