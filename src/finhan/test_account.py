@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from finhan.account import apply_balance, joint_account_transactions
+from finhan.account import apply_balance, joint_account_transactions, Account
 from finhan.adapters.bepost import Transaction
 
 
@@ -28,7 +28,7 @@ def test_grand_total_ends_in_grand_balance():
             Transaction(source="B", target="A", amount=10, date=d2),
         ),
     }
-    balances = {"A": 1010, "B": -10}
+    balances = {"A": Account("A", 1010, ""), "B": Account("B", -10, "")}
 
     dates, numbers = joint_account_transactions(balances, transactions)
     assert tuple(dates) == (d1, d2, d3)
