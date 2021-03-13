@@ -8,6 +8,9 @@ packages = [
     { include = "finhan", from ="src" }
 ]
 
+[tool.poetry.scripts]
+finhan-view = "finhan.main:main"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 matplotlib = "^3.3.4"

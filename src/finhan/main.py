@@ -51,4 +51,5 @@ def plot_for_account(account, current_balance, transactions):
                      label=f'balance {account}')
 
 
-main()
+if __name__ == '__main__':
+    main()
