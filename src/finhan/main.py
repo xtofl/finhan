@@ -56,7 +56,7 @@ def plot_for_account(account, current_balance, transactions, show_transactions):
     print(f'plotting for account {account} (end balance '
           f'{balance[-1]} == {current_balance}')
     line: Line2D = pyplot.plot_date(
-        dates, balance, '-',
+        dates, balance, '-', linewidth=.4,
         label=f'balance {account}')[0]
     if show_transactions:
         pyplot.plot_date(dates, numbers, '+', label=account,
