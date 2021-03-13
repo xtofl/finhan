@@ -5,7 +5,8 @@ from pathlib import Path
 from matplotlib import pyplot
 from matplotlib.lines import Line2D
 
-from finhan.account import read_balance, read_account_transactions, apply_balance, \
+from finhan.account import read_balance, read_account_transactions, \
+    apply_balance, \
     dates_and_numbers, joint_account_transactions
 
 
@@ -42,24 +43,23 @@ def main():
 
 def plot_each_account(current_balance, transactions_by_account,
                       show_transactions: bool):
-    for account, transactions in transactions_by_account.items():
-        plot_for_account(account,
-                         current_balance.get(account, None),
+    for account_id, transactions in transactions_by_account.items():
+        plot_for_account(current_balance.get(account_id, None),
                          transactions,
                          show_transactions)
 
 
-def plot_for_account(account, current_balance, transactions, show_transactions):
+def plot_for_account(account, transactions,
+                     show_transactions):
     dates, numbers = dates_and_numbers(transactions)
 
-    balance = apply_balance(current_balance, numbers)
-    print(f'plotting for account {account} (end balance '
-          f'{balance[-1]} == {current_balance}')
+    balance = apply_balance(account.balance, numbers)
+    print(f'plotting for account {account}')
     line: Line2D = pyplot.plot_date(
         dates, balance, '-', linewidth=.4,
-        label=f'balance {account}')[0]
+        label=f'balance {account.id_} ({account.name})')[0]
     if show_transactions:
-        pyplot.plot_date(dates, numbers, '+', label=account,
+        pyplot.plot_date(dates, numbers, '+', label=account.id_,
                          color=line.get_color())
 
 

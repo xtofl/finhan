@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import timedelta, datetime
 from functools import reduce
 from itertools import starmap, chain, groupby
@@ -12,13 +13,26 @@ from finhan.adapters import bepost as bepost
 AccountId = str
 Balance = float
 
+@dataclass
+class Account:
+    id_: AccountId
+    balance: Balance
+    name: str
 
-def read_balance(filename: Path) -> Dict[AccountId, Balance]:
+
+def read_balance(filename: Path) -> Dict[AccountId, Account]:
     with filename.open() as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
     assert config['schema'] == 'v1'
-    accounts = config['accounts']
-    return {AccountId(a['id']): Balance(a['balance']) for a in accounts}
+    accounts_data = config['accounts']
+    accounts = (
+        Account(
+            id_=a['id'],
+            balance=a['balance'],
+            name=a['name']
+        )
+        for a in accounts_data)
+    return {a.id_: a for a in accounts}
 
 
 def read_account_transactions(data_paths):
@@ -91,7 +105,7 @@ def joint_account_transactions(current_balance, transactions_by_account)\
     for date, transactions in groupby(transactions_by_date, get_date):
         total = total + sum(t.amount for t in transactions)
         joint.append(total)
-    joint_current_balance = sum(current_balance.values())
+    joint_current_balance = sum(a.balance for a in current_balance.values())
     return sorted(set(t.date for t in transactions_by_date)),\
            np.array(joint) - joint[-1] + joint_current_balance
 
