@@ -18,7 +18,7 @@ class Transaction:
 
 
 def bepost_format_choose(line, dirty, clean):
-    if 'ancontact' in line:
+    if "ancontact" in line:
         return dirty
 
     return clean
@@ -29,7 +29,7 @@ def _account(row: Sequence[str]):
 
 
 def parse_date(s):
-    return datetime.strptime(s, '%Y-%m-%d')
+    return datetime.strptime(s, "%Y-%m-%d")
 
 
 def _regular_parser(account, header_row: Sequence[str]):
@@ -39,17 +39,15 @@ def _regular_parser(account, header_row: Sequence[str]):
     def extract(convert, i):
         return lambda r: convert(r[i])
 
-    target = extract(str, index_of('Rekening tegenpartij :'))
-    amount = extract(_belgian_float, index_of('Bedrag van de verrichting'))
-    date = extract(parse_date, index_of('Transactie datum'))
+    target = extract(str, index_of("Rekening tegenpartij :"))
+    amount = extract(_belgian_float, index_of("Bedrag van de verrichting"))
+    date = extract(parse_date, index_of("Transactie datum"))
 
     def f(row: Sequence[str]):
         return Transaction(
-                source=account,
-                target=target(row),
-                amount=amount(row),
-                date=date(row)
-            )
+            source=account, target=target(row), amount=amount(row), date=date(row)
+        )
+
     return f
 
 
@@ -57,6 +55,7 @@ def _try_all(functions: dict):
     def combined(row: Sequence[str]):
         key = row[2]
         return functions[key](row)
+
     return combined
 
 
@@ -64,21 +63,22 @@ Account = str
 
 
 def _transactions(lines: Iterable[str]) -> Tuple[Iterable[Transaction], Account]:
-    reader = csv.reader(lines, delimiter=';')
+    reader = csv.reader(lines, delimiter=";")
     it = iter(reader)
     account = _account(row=next(it))
     regular = _regular_parser(account, header_row=next(it))
-    parser = _try_all({
-        'Uw doorlopende betalingsopdracht': regular,
-        'Domiciliëring - opneming': regular,
-        'Uw overschrijving': regular,
-        'Overschrijving in uw voordeel': regular,
-        'Kosten- en interestberekening': regular,
-        'Maestro-betaling': regular,
-        'Rekeningverzekering': regular,
-        'Overschr. (met getrouwheidspr.)': regular,
-        'Opneming Bancontact': _parser_for_bancontact_opneming(account),
-        'Bancontact-betaling': _parser_for_bancontact_betaling(account),
+    parser = _try_all(
+        {
+            "Uw doorlopende betalingsopdracht": regular,
+            "Domiciliëring - opneming": regular,
+            "Uw overschrijving": regular,
+            "Overschrijving in uw voordeel": regular,
+            "Kosten- en interestberekening": regular,
+            "Maestro-betaling": regular,
+            "Rekeningverzekering": regular,
+            "Overschr. (met getrouwheidspr.)": regular,
+            "Opneming Bancontact": _parser_for_bancontact_opneming(account),
+            "Bancontact-betaling": _parser_for_bancontact_betaling(account),
         }
     )
     return map(parser, filter(lambda n: len(n) > 2, reader)), account
@@ -93,35 +93,33 @@ def just(what):
 
 
 def _parser_for_bancontact_opneming(account):
-
     def parse(row):
-        if row[2] != 'Opneming Bancontact':
-            raise ValueError('Geen bancontact opneming')
+        if row[2] != "Opneming Bancontact":
+            raise ValueError("Geen bancontact opneming")
         return Transaction(
             date=parse_date(row[1]),
             source=account,
             target=row[10],
-            amount=_belgian_float(row[3])
+            amount=_belgian_float(row[3]),
         )
 
     return parse
 
 
 def _belgian_float(c):
-    return float(c.replace(',', '.'))
+    return float(c.replace(",", "."))
 
 
 def _parser_for_bancontact_betaling(account):
-
     def parse(row):
-        if row[2] != 'Bancontact-betaling':
-            raise ValueError('Geen bancontact betaling')
+        if row[2] != "Bancontact-betaling":
+            raise ValueError("Geen bancontact betaling")
 
         return Transaction(
             date=parse_date(row[1]),
             source=account,
             target=row[10],
-            amount=_belgian_float(row[3])
+            amount=_belgian_float(row[3]),
         )
-    return parse
 
+    return parse

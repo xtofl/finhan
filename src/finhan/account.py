@@ -13,6 +13,7 @@ from finhan.adapters import bepost as bepost
 AccountId = str
 Balance = float
 
+
 @dataclass
 class Account:
     id_: AccountId
@@ -23,28 +24,20 @@ class Account:
 def read_balance(filename: Path) -> Dict[AccountId, Account]:
     with filename.open() as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
-    assert config['schema'] == 'v1'
-    accounts_data = config['accounts']
+    assert config["schema"] == "v1"
+    accounts_data = config["accounts"]
     accounts = (
-        Account(
-            id_=a['id'],
-            balance=a['balance'],
-            name=a['name']
-        )
-        for a in accounts_data)
+        Account(id_=a["id"], balance=a["balance"], name=a["name"])
+        for a in accounts_data
+    )
     return {a.id_: a for a in accounts}
 
 
 def read_account_transactions(data_paths):
     line_lists = map(read_lines, data_paths)
-    transaction_lists = tuple(map(bepost.from_lines,
-                                  line_lists))
+    transaction_lists = tuple(map(bepost.from_lines, line_lists))
     transaction_lists = tuple(
-        starmap(
-            lambda ts, account: (
-                tuple(ts), account),
-            transaction_lists
-        )
+        starmap(lambda ts, account: (tuple(ts), account), transaction_lists)
     )
     accounts = tuple(account for _, account in transaction_lists)
 
@@ -82,32 +75,31 @@ def apply_balance(current_balance, numbers):
 
 
 def dates_and_numbers(transactions):
-    transactions = sorted(
-        transactions,
-        key=lambda t: t.date,
-        reverse=False)
+    transactions = sorted(transactions, key=lambda t: t.date, reverse=False)
     dates = tuple(t.date for t in transactions)
     numbers = tuple(t.amount for t in transactions)
     return dates, numbers
 
 
-def joint_account_transactions(current_balance, transactions_by_account)\
-        -> Tuple[Collection[datetime], Collection[Balance]]:
-
+def joint_account_transactions(
+    current_balance, transactions_by_account
+) -> Tuple[Collection[datetime], Collection[Balance]]:
     def get_date(transaction):
         return transaction.date
 
-    transactions_by_date = sorted(tuple(
-        chain(*transactions_by_account.values())
-    ), key=get_date)
+    transactions_by_date = sorted(
+        tuple(chain(*transactions_by_account.values())), key=get_date
+    )
     total = 0
     joint = []
     for date, transactions in groupby(transactions_by_date, get_date):
         total = total + sum(t.amount for t in transactions)
         joint.append(total)
     joint_current_balance = sum(a.balance for a in current_balance.values())
-    return sorted(set(t.date for t in transactions_by_date)),\
-           np.array(joint) - joint[-1] + joint_current_balance
+    return (
+        sorted(set(t.date for t in transactions_by_date)),
+        np.array(joint) - joint[-1] + joint_current_balance,
+    )
 
 
 def read_lines(filename: str) -> Iterator[str]:

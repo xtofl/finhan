@@ -17,18 +17,18 @@ def test_grand_total_ends_in_grand_balance():
     d3 = datetime(year=2021, month=5, day=3)
 
     transactions = {
-        'A': (
-            Transaction(source='A', target='X', amount=100, date=d1),
-            Transaction(source='A', target='B', amount=10, date=d1),
-            Transaction(source='A', target='B', amount=-10, date=d2),
-            Transaction(source='A', target='Y', amount=-50, date=d3),
+        "A": (
+            Transaction(source="A", target="X", amount=100, date=d1),
+            Transaction(source="A", target="B", amount=10, date=d1),
+            Transaction(source="A", target="B", amount=-10, date=d2),
+            Transaction(source="A", target="Y", amount=-50, date=d3),
         ),
-        'B': (
-            Transaction(source='B', target='A', amount=-10, date=d1),
-            Transaction(source='B', target='A', amount=10, date=d2),
-        )
+        "B": (
+            Transaction(source="B", target="A", amount=-10, date=d1),
+            Transaction(source="B", target="A", amount=10, date=d2),
+        ),
     }
-    balances = {'A': 1010, 'B': -10}
+    balances = {"A": 1010, "B": -10}
 
     dates, numbers = joint_account_transactions(balances, transactions)
     assert tuple(dates) == (d1, d2, d3)
