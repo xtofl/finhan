@@ -71,7 +71,7 @@ def dates_and_numbers(transactions):
     transactions = sorted(
         transactions,
         key=lambda t: t.date,
-        reverse=True)
+        reverse=False)
     dates = tuple(t.date for t in transactions)
     numbers = tuple(t.amount for t in transactions)
     return dates, numbers
