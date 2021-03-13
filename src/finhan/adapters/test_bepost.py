@@ -24,7 +24,6 @@ def sample():
 
 
 def test_bancontact_records_are_parsed_separately():
-    x = "whatever"
     preamble = [
         "Rekeningnummer :;account;b.compact rekening",
         "Nummer van de verrichting;Transactie datum;Beschrijving;Bedrag van de verrichting;Munt;Valuta datum;Rekening tegenpartij :;Naam tegenpartij;Mededeling;Referentie van de verrichting",
