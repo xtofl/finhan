@@ -15,8 +15,31 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install
+      - run: |
+          poetry run coverage run -m pytest src
+          mkdir coverage-reports
+          poetry run coverage xml -o coverage-reports/coverage-tests.xml
+          ls coverage-reports
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-reports
+          path: coverage-reports/coverage-tests.xml
+
   # This workflow contains a single job called "build"
   quality:
+    needs: tests
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -26,6 +49,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-reports
+          path: coverage-reports
+      - run: find .
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1.5
         with:
@@ -33,6 +63,7 @@ jobs:
           args: >
             -Dsonar.organization=xtofl
             -Dsonar.projectKey=xtofl_finhan
+            -Dsonar.python.coverage.reportPaths=coverage-reports/coverage-tests.xml
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
