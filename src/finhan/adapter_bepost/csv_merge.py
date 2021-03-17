@@ -6,11 +6,6 @@ from pathlib import Path
 from typing import Iterable, Sequence, Tuple
 
 
-def transaction_id(line):
-    parts = line.split(";")
-    return parts[-1]
-
-
 class Mapping:
     def __init__(self, target: Path, sources: Iterable[Path]):
         self.target = target.name + ".csv"
