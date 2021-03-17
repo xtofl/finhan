@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Sequence, Dict, Iterable
 
 from matplotlib import pyplot
 from matplotlib.lines import Line2D
@@ -11,14 +14,28 @@ from finhan.account import (
     apply_balance,
     dates_and_numbers,
     joint_account_transactions,
+    AccountId,
 )
 
 
-def plot_grand_total(current_balance, transactions_by_account):
+@dataclass
+class Plot:
+    dates: Sequence[datetime]
+    balance: Sequence[float]
+
+
+@dataclass
+class Plots:
+    grand_total: Plot
+    account_plots: Dict[AccountId, Plot]
+
+
+def plot_grand_total(current_balance, transactions_by_account) -> Plot:
     dates, grand_total = joint_account_transactions(
         current_balance, transactions_by_account
     )
     pyplot.plot_date(dates, grand_total, "-", label=f"GRAND TOTAL", linewidth=4)
+    return Plot(dates=dates, balance=grand_total)
 
 
 def main():
@@ -37,33 +54,43 @@ def main():
     )
 
     options = parser.parse_args()
-
-    current_balance = read_balance(options.balance)
-    print(current_balance)
-    transactions_by_account = read_account_transactions(options.data_paths)
-    plot_each_account(
-        current_balance,
-        transactions_by_account,
+    create_plots(
+        current_balance=read_balance(Path(options.balance)),
+        transactions_by_account=read_account_transactions(options.data_paths),
         show_transactions=options.show_transactions,
     )
-    plot_grand_total(current_balance, transactions_by_account)
+    pyplot.show()
+
+
+def create_plots(
+    current_balance, transactions_by_account, show_transactions
+) -> Plots:
+    print(current_balance)
+    account_plots = tuple(
+        plot_each_account(
+            current_balance,
+            transactions_by_account,
+            show_transactions=show_transactions,
+        )
+    )
+    grand = plot_grand_total(current_balance, transactions_by_account)
     pyplot.grid()
     pyplot.legend()
-    pyplot.show()
+    return Plots(grand_total=grand, account_plots=account_plots)
 
 
 def plot_each_account(
     current_balance, transactions_by_account, show_transactions: bool
-):
+) -> Iterable[Plot]:
     for account_id, transactions in transactions_by_account.items():
-        plot_for_account(
+        yield plot_for_account(
             current_balance.get(account_id, None),
             transactions,
             show_transactions,
         )
 
 
-def plot_for_account(account, transactions, show_transactions):
+def plot_for_account(account, transactions, show_transactions) -> Plot:
     dates, numbers = dates_and_numbers(transactions)
 
     balance = apply_balance(account.balance, numbers)
@@ -79,6 +106,7 @@ def plot_for_account(account, transactions, show_transactions):
         pyplot.plot_date(
             dates, numbers, "+", label=account.id_, color=line.get_color()
         )
+    return Plot(dates=dates, balance=balance)
 
 
 if __name__ == "__main__":
