@@ -8,7 +8,7 @@ from typing import Iterable, Sequence, Tuple
 
 class Mapping:
     def __init__(self, target: Path, sources: Iterable[Path]):
-        self.target = target.name + ".csv"
+        self.target = Path(target.name + ".csv")
         self.sources = tuple(sources)
 
     class OpenMapping:
@@ -52,7 +52,9 @@ class Mapping:
 
 
 def target_files(paths: Iterable[Path]) -> Iterable[Mapping]:
-    for a, fs in groupby(iter(paths), key=lambda path: str(path).partition("EURd")[0]):
+    for a, fs in groupby(
+        iter(paths), key=lambda path: str(path).partition("EURd")[0]
+    ):
         yield Mapping(Path(a), fs)
 
 

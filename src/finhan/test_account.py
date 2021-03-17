@@ -2,8 +2,12 @@ from datetime import datetime
 
 import pytest
 
-from finhan.account import apply_balance, joint_account_transactions, Account, \
-    read_balance
+from finhan.account import (
+    apply_balance,
+    joint_account_transactions,
+    Account,
+    read_balance,
+)
 from finhan.adapter_bepost.csv_transactions import Transaction
 
 
@@ -57,16 +61,17 @@ accounts:
                 name: savings
                 balance: 9134.68
 """
-    balance_file = tmp_path / 'b.yml'
-    with open(balance_file, 'w') as f:
+    balance_file = tmp_path / "b.yml"
+    with open(balance_file, "w") as f:
         f.write(yaml)
 
     balance = read_balance(balance_file)
-    assert set(('BE123456789', 'BE654987321', 'BE489156489')) == set(
-        balance.keys())
+    assert set(("BE123456789", "BE654987321", "BE489156489")) == set(
+        balance.keys()
+    )
 
-    assert balance['BE123456789'].name == 'daily'
-    assert balance['BE123456789'].balance == 201.11
+    assert balance["BE123456789"].name == "daily"
+    assert balance["BE123456789"].balance == 201.11
 
 
 def test_read_balance_raises_for_unknown_schema(tmp_path):
@@ -74,8 +79,8 @@ def test_read_balance_raises_for_unknown_schema(tmp_path):
     schema: "vWHAT?"
     last updated: 2021-03-13
 """
-    balance_file = tmp_path / 'b.yml'
-    with open(balance_file, 'w') as f:
+    balance_file = tmp_path / "b.yml"
+    with open(balance_file, "w") as f:
         f.write(yaml)
 
     with pytest.raises(Exception):

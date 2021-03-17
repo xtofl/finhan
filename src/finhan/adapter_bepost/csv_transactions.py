@@ -45,7 +45,10 @@ def _regular_parser(account, header_row: Sequence[str]):
 
     def f(row: Sequence[str]):
         return Transaction(
-            source=account, target=target(row), amount=amount(row), date=date(row)
+            source=account,
+            target=target(row),
+            amount=amount(row),
+            date=date(row),
         )
 
     return f
@@ -62,7 +65,9 @@ def _try_all(functions: dict):
 Account = str
 
 
-def _transactions(lines: Iterable[str]) -> Tuple[Iterable[Transaction], Account]:
+def _transactions(
+    lines: Iterable[str],
+) -> Tuple[Iterable[Transaction], Account]:
     reader = csv.reader(lines, delimiter=";")
     it = iter(reader)
     account = _account(row=next(it))

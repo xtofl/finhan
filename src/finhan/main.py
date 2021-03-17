@@ -31,7 +31,9 @@ def main():
         "dict of account -> balance",
     )
     parser.add_argument(
-        "--show_transactions", action="store_true", help="plot each transaction, too"
+        "--show_transactions",
+        action="store_true",
+        help="plot each transaction, too",
     )
 
     options = parser.parse_args()
@@ -55,7 +57,9 @@ def plot_each_account(
 ):
     for account_id, transactions in transactions_by_account.items():
         plot_for_account(
-            current_balance.get(account_id, None), transactions, show_transactions
+            current_balance.get(account_id, None),
+            transactions,
+            show_transactions,
         )
 
 
@@ -72,7 +76,9 @@ def plot_for_account(account, transactions, show_transactions):
         label=f"balance {account.id_} ({account.name})",
     )[0]
     if show_transactions:
-        pyplot.plot_date(dates, numbers, "+", label=account.id_, color=line.get_color())
+        pyplot.plot_date(
+            dates, numbers, "+", label=account.id_, color=line.get_color()
+        )
 
 
 if __name__ == "__main__":
