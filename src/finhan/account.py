@@ -8,7 +8,7 @@ from typing import Dict, Iterator, Collection, Tuple
 import numpy as np
 import yaml
 
-from finhan.adapters import bepost as bepost
+from finhan.adapter_bepost import csv_transactions as bepost
 
 AccountId = str
 Balance = float

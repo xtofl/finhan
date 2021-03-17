@@ -4,7 +4,7 @@ import pytest
 
 from finhan.account import apply_balance, joint_account_transactions, Account, \
     read_balance
-from finhan.adapters.bepost import Transaction
+from finhan.adapter_bepost.csv_transactions import Transaction
 
 
 def test_balance_series_ends_in_current_balance():
