@@ -10,7 +10,7 @@ packages = [
 
 [tool.poetry.scripts]
 finhan-view = "finhan.main:main"
-finhan-bepost-csvs = "finhan.adapters.bepost_merge_csv_files:main"
+finhan-bepost-csvs = "finhan.adapter_bepost.csv_merge:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
