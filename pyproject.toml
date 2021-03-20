@@ -10,6 +10,7 @@ packages = [
 
 [tool.poetry.scripts]
 finhan-view = "finhan.main:main"
+finhan-table = "finhan.adapter_table:main"
 finhan-bepost-csvs = "finhan.adapter_bepost.csv_merge:main"
 
 [tool.poetry.dependencies]
