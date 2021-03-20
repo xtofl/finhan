@@ -4,7 +4,7 @@
 
 View the balance of some of your accounts over time.
 
-![demo-data](demo-data/grand-total.png)
+![demo-data](tests_e2e/demo-data/grand-total.png)
 
 ## Contributing
 
