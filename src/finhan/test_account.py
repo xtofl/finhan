@@ -8,7 +8,7 @@ from finhan.account import (
     Account,
     read_balance,
 )
-from finhan.adapter_bepost.csv_transactions import Transaction
+from finhan.transaction import Transaction
 
 
 def test_balance_series_ends_in_current_balance():

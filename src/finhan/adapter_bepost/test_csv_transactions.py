@@ -2,7 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from .csv_transactions import from_lines, Transaction
+from .csv_transactions import from_lines
+from ..transaction import Transaction
 
 SAMPLE = """Rekeningnummer :;BE0123456789;b.compact rekening
 Nummer van de verrichting;Transactie datum;Beschrijving;Bedrag van de verrichting;Munt;Valuta datum;Rekening tegenpartij :;Naam tegenpartij;Mededeling;Referentie van de verrichting

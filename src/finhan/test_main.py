@@ -9,7 +9,7 @@ from finhan.account import (
     Account,
     read_balance,
 )
-from finhan.adapter_bepost.csv_transactions import Transaction
+from finhan.transaction import Transaction
 from finhan.main import create_plots, Plots
 
 A = "BE123456789"

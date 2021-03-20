@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from .csv_merge import target_files, cooked
-from .csv_transactions import from_lines, Transaction
+from .csv_transactions import from_lines
+from ..transaction import Transaction
 import pytest
 
 SAMPLES = (

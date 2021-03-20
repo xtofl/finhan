@@ -1,20 +1,8 @@
 import csv
-import locale
-from contextlib import contextmanager
-from dataclasses import dataclass, astuple
 from datetime import datetime
 from typing import Iterable, Sequence, Tuple
 
-
-@dataclass
-class Transaction:
-    date: datetime
-    source: str
-    target: str
-    amount: float
-
-    def __hash__(self):
-        return hash(astuple(self))
+from finhan.transaction import Transaction
 
 
 def bepost_format_choose(line, dirty, clean):
