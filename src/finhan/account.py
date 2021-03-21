@@ -5,7 +5,6 @@ from itertools import starmap, chain, groupby
 from pathlib import Path
 from typing import Dict, Iterator, Collection, Tuple
 
-import numpy as np
 import yaml
 
 from finhan.adapter_bepost import csv_transactions as bepost
@@ -60,18 +59,18 @@ def find_edges(dates):
     return edges, edges_u
 
 
-def unix_timestamps(dates):
-    dates_t = np.empty(len(dates))
-    for i, d in enumerate(dates):
-        dates_t[i] = d.timestamp()
-    return dates_t
-
-
 def apply_balance(current_balance, numbers):
-    saldo_floating = np.cumsum(numbers)
+    saldo_floating = tuple(cumsum(numbers))
     last_floating_saldo = saldo_floating[-1]
-    saldo = saldo_floating + (current_balance - last_floating_saldo)
+    saldo = array_add(saldo_floating, current_balance - last_floating_saldo)
     return saldo
+
+
+def cumsum(arr):
+    s = 0
+    for x in arr:
+        s += x
+        yield s
 
 
 def dates_and_numbers(transactions):
@@ -98,8 +97,12 @@ def joint_account_transactions(
     joint_current_balance = sum(a.balance for a in current_balance.values())
     return (
         sorted(set(t.date for t in transactions_by_date)),
-        np.array(joint) - joint[-1] + joint_current_balance,
+        array_add(joint, -joint[-1] + joint_current_balance)
     )
+
+
+def array_add(arr, c):
+    return type(arr)(x + c for x in arr)
 
 
 def read_lines(filename: str) -> Iterator[str]:
