@@ -66,6 +66,7 @@ def _transactions(
             "Domiciliëring - opneming": regular,
             "Uw overschrijving": regular,
             "Overschrijving in uw voordeel": regular,
+            "Instant overschr. te uwen gunste": regular,
             "Kosten- en interestberekening": regular,
             "Maestro-betaling": regular,
             "Rekeningverzekering": regular,
