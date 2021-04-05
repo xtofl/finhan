@@ -37,18 +37,21 @@ def test_bancontact_records_are_parsed_separately():
 
 def test_columns_are_well_read(sample):
     transactions, account = from_lines(sample.split("\n"))
+    transactions = tuple(transactions)  # easier to debug
     expected = (
         Transaction(
             date=datetime(year=2021, month=1, day=18),
             source="BE0123456789",
             target="BE11405050461148",
             amount=-70.48,
+            message="+++149/8960/18071+++ ",
         ),
         Transaction(
             date=datetime(year=2021, month=1, day=18),
             source="BE0123456789",
             target="BE654987654321",
             amount=-99,
+            message="+++681/0352/57232+++ ",
         ),
     )
 

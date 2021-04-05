@@ -97,7 +97,7 @@ def joint_account_transactions(
     joint_current_balance = sum(a.balance for a in current_balance.values())
     return (
         sorted(set(t.date for t in transactions_by_date)),
-        array_add(joint, -joint[-1] + joint_current_balance)
+        array_add(joint, -joint[-1] + joint_current_balance),
     )
 
 

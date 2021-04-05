@@ -30,6 +30,7 @@ def _regular_parser(account, header_row: Sequence[str]):
     target = extract(str, index_of("Rekening tegenpartij :"))
     amount = extract(_belgian_float, index_of("Bedrag van de verrichting"))
     date = extract(parse_date, index_of("Transactie datum"))
+    message = extract(str, index_of("Mededeling"))
 
     def f(row: Sequence[str]):
         return Transaction(
@@ -37,6 +38,7 @@ def _regular_parser(account, header_row: Sequence[str]):
             target=target(row),
             amount=amount(row),
             date=date(row),
+            message=message(row),
         )
 
     return f
@@ -95,6 +97,7 @@ def _parser_for_bancontact_opneming(account):
             source=account,
             target=row[10],
             amount=_belgian_float(row[3]),
+            message="bancontact geldopneming",
         )
 
     return parse
@@ -114,6 +117,7 @@ def _parser_for_bancontact_betaling(account):
             source=account,
             target=row[10],
             amount=_belgian_float(row[3]),
+            message=f"bancontact betaling",
         )
 
     return parse
