@@ -46,6 +46,7 @@ def main():
     parser.add_argument(
         "--balance",
         type=Path,
+        default="balance.yaml",
         help="Path to current balance file.  This file should contain a "
         "dict of account -> balance",
     )
