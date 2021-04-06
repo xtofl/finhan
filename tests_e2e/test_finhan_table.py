@@ -4,6 +4,8 @@ from typing import Iterable
 
 import pytest
 
+from tests_e2e.fuzzy_search import FuzzySearch
+
 
 @pytest.fixture
 def raw_data_dir():
@@ -29,6 +31,7 @@ def test_create_table(raw_data_files: Iterable[Path]):
         ]
     )
     assert table is not None
+    table = FuzzySearch(table)
     assert (
         b'2020/09/15     247.89 BE000000334023 "OVERDRACHT SPAARREKENING "'
         in table
