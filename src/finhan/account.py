@@ -7,8 +7,6 @@ from typing import Dict, Iterator, Collection, Tuple
 
 import yaml
 
-from finhan.adapter_bepost import csv_transactions as bepost
-
 AccountId = str
 Balance = float
 
@@ -32,9 +30,9 @@ def read_balance(filename: Path) -> Dict[AccountId, Account]:
     return {a.id_: a for a in accounts}
 
 
-def read_account_transactions(data_paths):
+def read_account_transactions(data_paths, from_lines):
     line_lists = map(read_lines, data_paths)
-    transaction_lists = tuple(map(bepost.from_lines, line_lists))
+    transaction_lists = tuple(map(from_lines, line_lists))
     transaction_lists = tuple(
         starmap(lambda ts, account: (tuple(ts), account), transaction_lists)
     )

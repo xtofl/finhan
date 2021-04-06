@@ -17,6 +17,8 @@ from finhan.account import (
     AccountId,
 )
 
+import finhan.adapter_bepost.csv_transactions
+
 
 @dataclass
 class Plot:
@@ -56,7 +58,10 @@ def main():
     options = parser.parse_args()
     create_plots(
         current_balance=read_balance(Path(options.balance)),
-        transactions_by_account=read_account_transactions(options.data_paths),
+        transactions_by_account=read_account_transactions(
+            data_paths=options.data_paths,
+            from_lines=finhan.adapter_bepost.csv_transactions.from_lines,
+        ),
         show_transactions=options.show_transactions,
     )
     pyplot.show()
