@@ -28,9 +28,15 @@ def test_a_table_can_be_generated():
             message="a little more",
         ),
     )
+    party_names = {
+        "BE987987654": "party 1",
+    }
     assert (
-        generate_from("From BE123456789", transactions) == "From BE123456789\n"
-        '2020/01/05   -1000.00 BE987987654 "just for fun"\n'
-        '2020/05/15    1000.00 BE987987654 "payback"\n'
-        '2020/05/15      10.00 BE987987654 "a little more"'
+        generate_from(
+            "From BE123456789", transactions, account_names=party_names
+        )
+        == "From BE123456789\n"
+        '2020/01/05   -1000.00 BE987987654 "party 1" "just for fun"\n'
+        '2020/05/15    1000.00 BE987987654 "party 1" "payback"\n'
+        '2020/05/15      10.00 BE987987654 "party 1" "a little more"'
     )

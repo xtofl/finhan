@@ -18,6 +18,7 @@ from finhan.account import (
 )
 
 import finhan.adapter_bepost.csv_transactions
+from finhan.account_names import from_file
 
 
 @dataclass
@@ -51,14 +52,24 @@ def main():
         "dict of account -> balance",
     )
     parser.add_argument(
+        "--account-names-file",
+        type=str,
+        default="account-names.yaml",
+        help="yaml file with account names",
+    )
+    parser.add_argument(
         "--show_transactions",
         action="store_true",
         help="plot each transaction, too",
     )
 
     options = parser.parse_args()
+    account_names = (from_file(Path(options.account_names_file)),)
     create_plots(
-        current_balance=read_balance(Path(options.balance)),
+        current_balance=read_balance(
+            balance_file=Path(options.balance),
+            names_file=Path(options.account_names_file),
+        ),
         transactions_by_account=read_account_transactions(
             data_paths=options.data_paths,
             from_lines=finhan.adapter_bepost.csv_transactions.from_lines,

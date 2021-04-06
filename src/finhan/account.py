@@ -7,6 +7,8 @@ from typing import Dict, Iterator, Collection, Tuple
 
 import yaml
 
+from finhan.account_names import from_file
+
 AccountId = str
 Balance = float
 
@@ -18,13 +20,16 @@ class Account:
     name: str
 
 
-def read_balance(filename: Path) -> Dict[AccountId, Account]:
-    with filename.open() as f:
+def read_balance(
+    balance_file: Path, names_file: Path
+) -> Dict[AccountId, Account]:
+    with balance_file.open() as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
     assert config["schema"] == "v1"
     accounts_data = config["accounts"]
+    account_names = from_file(names_file)
     accounts = (
-        Account(id_=a["id"], balance=a["balance"], name=a["name"])
+        Account(id_=a["id"], balance=a["balance"], name=account_names[a["id"]])
         for a in accounts_data
     )
     return {a.id_: a for a in accounts}

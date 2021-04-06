@@ -50,22 +50,37 @@ last updated: 2021-03-13
 accounts:
         -
                 id: BE123456789
-                name: daily
                 balance: 201.11
         -
                 id: BE654987321
-                name: backup
                 balance: 1735.91
         -
                 id: BE489156489
-                name: savings
                 balance: 9134.68
 """
     balance_file = tmp_path / "b.yml"
     with open(balance_file, "w") as f:
         f.write(yaml)
 
-    balance = read_balance(balance_file)
+    names_file = tmp_path / "n.yml"
+    with open(names_file, "w") as f:
+        f.write(
+            """
+schema: "v1"
+last updated: 2021-03-13
+accounts:
+        -
+                id: BE123456789
+                name: daily
+        -
+                id: BE654987321
+                name: backup
+        -
+                id: BE489156489
+                name: savings
+        """
+        )
+    balance = read_balance(balance_file, names_file)
     assert set(("BE123456789", "BE654987321", "BE489156489")) == set(
         balance.keys()
     )
