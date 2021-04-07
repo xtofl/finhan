@@ -1,6 +1,7 @@
-import csv
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable, Sequence, Tuple
+from enum import Enum
+from typing import Iterable, Sequence, Tuple, Callable, Dict, Any
 
 from finhan.transaction import Transaction
 
@@ -20,17 +21,14 @@ def parse_date(s):
     return datetime.strptime(s, "%Y-%m-%d")
 
 
-def _regular_parser(account, header_row: Sequence[str]):
-    def index_of(s):
-        return next(i for i, n in enumerate(header_row) if n == s)
+def _regular_parser(account, header_row: Sequence["BePostRow"]):
 
-    def extract(convert, i):
-        return lambda r: convert(r[i])
-
-    target = extract(str, index_of("Rekening tegenpartij :"))
-    amount = extract(_belgian_float, index_of("Bedrag van de verrichting"))
-    date = extract(parse_date, index_of("Transactie datum"))
-    message = extract(str, index_of("Mededeling"))
+    target = extractor(str, header_row.index_of("Rekening tegenpartij :"))
+    amount = extractor(
+        _belgian_float, header_row.index_of("Bedrag van de verrichting")
+    )
+    date = extractor(parse_date, header_row.index_of("Transactie datum"))
+    message = extractor(str, header_row.index_of("Mededeling"))
 
     def f(row: Sequence[str]):
         return Transaction(
@@ -44,9 +42,11 @@ def _regular_parser(account, header_row: Sequence[str]):
     return f
 
 
-def _try_all(functions: dict):
-    def combined(row: Sequence[str]):
-        key = row[2]
+def _by_type(
+    functions: Dict["BePostTransactionType", Callable[["BePostRow"], Any]]
+) -> Callable[["BePostRow"], Any]:
+    def combined(row: "BePostRow"):
+        key = row.transaction_type()
         return functions[key](row)
 
     return combined
@@ -58,26 +58,19 @@ Account = str
 def _transactions(
     lines: Iterable[str],
 ) -> Tuple[Iterable[Transaction], Account]:
-    reader = csv.reader(lines, delimiter=";")
-    it = iter(reader)
+    it = bepost_rows(lines)
     account = _account(row=next(it))
     regular = _regular_parser(account, header_row=next(it))
-    parser = _try_all(
+    bancontact_withdrawal = _parser_for_bancontact_opneming(account)
+    bancontact_payment = _parser_for_bancontact_betaling(account)
+    parser = _by_type(
         {
-            "Uw doorlopende betalingsopdracht": regular,
-            "Domiciliëring - opneming": regular,
-            "Uw overschrijving": regular,
-            "Overschrijving in uw voordeel": regular,
-            "Instant overschr. te uwen gunste": regular,
-            "Kosten- en interestberekening": regular,
-            "Maestro-betaling": regular,
-            "Rekeningverzekering": regular,
-            "Overschr. (met getrouwheidspr.)": regular,
-            "Opneming Bancontact": _parser_for_bancontact_opneming(account),
-            "Bancontact-betaling": _parser_for_bancontact_betaling(account),
+            BePostTransactionType.REGULAR: regular,
+            BePostTransactionType.BANCONTACT_WITHDRAWAL: bancontact_withdrawal,
+            BePostTransactionType.BANCONTACT_PAYMENT: bancontact_payment,
         }
     )
-    return map(parser, filter(lambda n: len(n) > 2, reader)), account
+    return map(parser, filter(lambda n: len(n) > 2, it)), account
 
 
 def from_lines(lines: Iterable[str]) -> Tuple[Iterable[Transaction], Account]:
@@ -89,8 +82,11 @@ def just(what):
 
 
 def _parser_for_bancontact_opneming(account):
-    def parse(row):
-        if row[2] != "Opneming Bancontact":
+    def parse(row: BePostRow):
+        if (
+            row.transaction_type()
+            != BePostTransactionType.BANCONTACT_WITHDRAWAL
+        ):
             raise ValueError("Geen bancontact opneming")
         return Transaction(
             date=parse_date(row[1]),
@@ -108,7 +104,7 @@ def _belgian_float(c):
 
 
 def _parser_for_bancontact_betaling(account):
-    def parse(row):
+    def parse(row: BePostRow):
         if row[2] != "Bancontact-betaling":
             raise ValueError("Geen bancontact betaling")
 
@@ -121,3 +117,58 @@ def _parser_for_bancontact_betaling(account):
         )
 
     return parse
+
+
+class BePostTransactionType(Enum):
+    BANCONTACT_PAYMENT = 1
+    BANCONTACT_WITHDRAWAL = 2
+    REGULAR = 10
+
+
+BePostTransactionType_MAP = {
+    "Uw doorlopende betalingsopdracht": BePostTransactionType.REGULAR,
+    "Domiciliëring - opneming": BePostTransactionType.REGULAR,
+    "Uw overschrijving": BePostTransactionType.REGULAR,
+    "Overschrijving in uw voordeel": BePostTransactionType.REGULAR,
+    "Instant overschr. te uwen gunste": BePostTransactionType.REGULAR,
+    "Kosten- en interestberekening": BePostTransactionType.REGULAR,
+    "Maestro-betaling": BePostTransactionType.REGULAR,
+    "Rekeningverzekering": BePostTransactionType.REGULAR,
+    "Overschr. (met getrouwheidspr.)": BePostTransactionType.REGULAR,
+    "Opneming Bancontact": BePostTransactionType.BANCONTACT_WITHDRAWAL,
+    "Bancontact-betaling": BePostTransactionType.BANCONTACT_PAYMENT,
+}
+
+
+@dataclass
+class BePostRow:
+    cells: Tuple[str]
+
+    def __getitem__(self, item: int) -> str:
+        return self.cells[item]
+
+    def __len__(self):
+        return len(self.cells)
+
+    def transaction_type(self) -> BePostTransactionType:
+        return BePostTransactionType_MAP[self.cells[2]]
+
+    @staticmethod
+    def transaction_type_is(
+        t: BePostTransactionType,
+    ) -> Callable[["BePostRow"], bool]:
+        def _equal(b: "BePostRow") -> bool:
+            return b.transaction_type() == t
+
+        return _equal
+
+    def index_of(self, s: str) -> int:
+        return next(i for i, n in enumerate(self.cells) if n == s)
+
+
+def extractor(convert: Callable, i: int):
+    return lambda r: convert(r[i])
+
+
+def bepost_rows(lines: Iterable[str]) -> Iterable[BePostRow]:
+    return (BePostRow(line.split(";")) for line in lines)
