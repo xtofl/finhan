@@ -62,25 +62,12 @@ accounts:
     with open(balance_file, "w") as f:
         f.write(yaml)
 
-    names_file = tmp_path / "n.yml"
-    with open(names_file, "w") as f:
-        f.write(
-            """
-schema: "v1"
-last updated: 2021-03-13
-accounts:
-        -
-                id: BE123456789
-                name: daily
-        -
-                id: BE654987321
-                name: backup
-        -
-                id: BE489156489
-                name: savings
-        """
-        )
-    balance = read_balance(balance_file, names_file)
+    names = {
+        "BE123456789": "daily",
+        "BE654987321": "backup",
+        "BE489156489": "savings",
+    }
+    balance = read_balance(balance_file, names)
     assert set(("BE123456789", "BE654987321", "BE489156489")) == set(
         balance.keys()
     )
@@ -99,4 +86,4 @@ def test_read_balance_raises_for_unknown_schema(tmp_path):
         f.write(yaml)
 
     with pytest.raises(Exception):
-        read_balance(balance_file)
+        read_balance(balance_file, {})

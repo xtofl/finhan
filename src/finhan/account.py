@@ -21,13 +21,12 @@ class Account:
 
 
 def read_balance(
-    balance_file: Path, names_file: Path
+    balance_file: Path, account_names: Dict[AccountId, str]
 ) -> Dict[AccountId, Account]:
     with balance_file.open() as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
     assert config["schema"] == "v1"
     accounts_data = config["accounts"]
-    account_names = from_file(names_file)
     accounts = (
         Account(id_=a["id"], balance=a["balance"], name=account_names[a["id"]])
         for a in accounts_data

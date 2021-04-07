@@ -19,6 +19,8 @@ from finhan.account import (
 
 import finhan.adapter_bepost.csv_transactions
 from finhan.account_names import from_file
+from finhan.adapter_bepost import csv_extract_account_names
+from finhan.adapter_bepost.csv_extract_account_names import from_files
 
 
 @dataclass
@@ -64,11 +66,16 @@ def main():
     )
 
     options = parser.parse_args()
-    account_names = (from_file(Path(options.account_names_file)),)
+    account_names = dict(
+        csv_extract_account_names.from_files(map(Path, options.data_paths))
+    )
+    account_names.update(
+        finhan.account_names.from_file(Path(options.account_names_file))
+    )
     create_plots(
         current_balance=read_balance(
             balance_file=Path(options.balance),
-            names_file=Path(options.account_names_file),
+            account_names=account_names,
         ),
         transactions_by_account=read_account_transactions(
             data_paths=options.data_paths,

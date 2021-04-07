@@ -12,6 +12,7 @@ packages = [
 finhan-view = "finhan.main:main"
 finhan-table = "finhan.adapter_table:main"
 finhan-bepost-csvs = "finhan.adapter_bepost.csv_merge:main"
+finhan-bepost-names = "finhan.adapter_bepost.csv_extract_account_names:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
