@@ -50,8 +50,16 @@ def read_transactions(
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--account", required=True)
-    parser.add_argument("--file-format", default="bepost")
+    parser.add_argument(
+        "--account", required=True, help="the account Id to create a table for."
+    )
+    parser.add_argument(
+        "--file-format",
+        default="bepost",
+        help="the format your data are in; valid values: {'bepost', '?'}"
+        ".  Use '?' to list the possibilities for the provided data "
+        "files.",
+    )
     parser.add_argument(
         "--account-names-file",
         type=str,
