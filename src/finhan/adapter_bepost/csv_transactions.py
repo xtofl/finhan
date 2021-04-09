@@ -6,13 +6,6 @@ from typing import Iterable, Sequence, Tuple, Callable, Dict, Any
 from finhan.transaction import Transaction
 
 
-def bepost_format_choose(line, dirty, clean):
-    if "ancontact" in line:
-        return dirty
-
-    return clean
-
-
 def _account(row: Sequence[str]):
     return row[1]
 
