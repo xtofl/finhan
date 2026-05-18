@@ -24,12 +24,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: Gr1N/setup-poetry@v4
-      - run: poetry install
+      - run: uv sync
       - run: |
-          poetry run coverage run -m pytest src
+          uv run coverage run -m pytest src
           mkdir coverage-reports
-          poetry run coverage xml -o coverage-reports/coverage-tests.xml
+          uv run coverage xml -o coverage-reports/coverage-tests.xml
           ls coverage-reports
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
