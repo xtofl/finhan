@@ -1,31 +1,31 @@
-[tool.poetry]
+[project]
 name = "finhan"
 version = "1.0.0-alpha.0"
 description = "Financial Projection for individuals and households"
-authors = ["xtofl"]
-license = "LGPL"
-packages = [
-    { include = "finhan", from ="src" }
+authors = [{name = "xtofl", email = "kristoffel.pirard@gmail.com"}]
+license = "LGPL-3.0-or-later"
+requires-python = ">=3.10, <4"
+dependencies = [
+	"matplotlib>=3.3.4",
+	"PyYAML>=5.4.1"
 ]
 
-[tool.poetry.scripts]
+[dependency-groups]
+dev = [
+	"black>=26.3.0,<27",
+	"coverage>=5.5",
+	"pytest>=6.2.2",
+]
+
+
+
+[tool.uv]
+package = true
+
+[project.scripts]
 finhan-view = "finhan.main:main"
 finhan-table = "finhan.adapter_table:main"
 finhan-bepost-csvs = "finhan.adapter_bepost.csv_merge:main"
 finhan-bepost-names = "finhan.adapter_bepost.csv_extract_account_names:main"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-matplotlib = "^3.3.4"
-PyYAML = "^5.4.1"
-coverage = "^5.5"
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.2"
-
-[tool.black]
-line-length = 80
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
