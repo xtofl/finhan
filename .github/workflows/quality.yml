@@ -24,15 +24,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: Gr1N/setup-poetry@v4
-      - run: poetry install
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - run: uv sync
       - run: |
-          poetry run coverage run -m pytest src
+          uv run coverage run -m pytest src
           mkdir coverage-reports
-          poetry run coverage xml -o coverage-reports/coverage-tests.xml
+          uv run coverage xml -o coverage-reports/coverage-tests.xml
           ls coverage-reports
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
           path: coverage-reports/coverage-tests.xml
@@ -50,14 +51,14 @@ jobs:
           fetch-depth: 0
 
       - name: Download coverage reports
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: coverage-reports
           path: coverage-reports
       - run: find .
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.5
+        uses: SonarSource/sonarqube-scan-action@v8.0.0
         with:
           projectBaseDir: src
           args: >

@@ -68,9 +68,7 @@ accounts:
         "BE489156489": "savings",
     }
     balance = read_balance(balance_file, names)
-    assert set(("BE123456789", "BE654987321", "BE489156489")) == set(
-        balance.keys()
-    )
+    assert set(("BE123456789", "BE654987321", "BE489156489")) == set(balance.keys())
 
     assert balance["BE123456789"].name == "daily"
     assert balance["BE123456789"].balance == 201.11

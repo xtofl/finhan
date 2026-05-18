@@ -16,14 +16,10 @@ class FuzzySearch(Generic[Splittable]):
     def __init__(self, text: Splittable):
         self._text = text
 
-        self._chunks: Tuple[Tuple[Splittable]] = tuple(
-            map(split, text.splitlines())
-        )
+        self._chunks: Tuple[Tuple[Splittable]] = tuple(map(split, text.splitlines()))
 
     def __contains__(self, item: Splittable) -> bool:
-        return any(
-            all(i in chunks for i in item.split()) for chunks in self._chunks
-        )
+        return any(all(i in chunks for i in item.split()) for chunks in self._chunks)
 
     def __repr__(self):
         return str(self._chunks)

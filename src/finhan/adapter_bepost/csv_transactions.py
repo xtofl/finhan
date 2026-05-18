@@ -17,9 +17,7 @@ def parse_date(s):
 def _regular_parser(account, header_row: Sequence["BePostRow"]):
 
     target = extractor(str, header_row.index_of("Rekening tegenpartij :"))
-    amount = extractor(
-        _belgian_float, header_row.index_of("Bedrag van de verrichting")
-    )
+    amount = extractor(_belgian_float, header_row.index_of("Bedrag van de verrichting"))
     date = extractor(parse_date, header_row.index_of("Transactie datum"))
     message = extractor(str, header_row.index_of("Mededeling"))
 
@@ -36,7 +34,7 @@ def _regular_parser(account, header_row: Sequence["BePostRow"]):
 
 
 def _by_type(
-    functions: Dict["BePostTransactionType", Callable[["BePostRow"], Any]]
+    functions: Dict["BePostTransactionType", Callable[["BePostRow"], Any]],
 ) -> Callable[["BePostRow"], Any]:
     def combined(row: "BePostRow"):
         key = row.transaction_type()
@@ -76,10 +74,7 @@ def just(what):
 
 def _parser_for_bancontact_opneming(account):
     def parse(row: BePostRow):
-        if (
-            row.transaction_type()
-            != BePostTransactionType.BANCONTACT_WITHDRAWAL
-        ):
+        if row.transaction_type() != BePostTransactionType.BANCONTACT_WITHDRAWAL:
             raise ValueError("Geen bancontact opneming")
         return Transaction(
             date=parse_date(row[1]),
