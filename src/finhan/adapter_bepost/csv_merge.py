@@ -52,9 +52,7 @@ class Mapping:
 
 
 def target_files(paths: Iterable[Path]) -> Iterable[Mapping]:
-    for a, fs in groupby(
-        iter(paths), key=lambda path: str(path).partition("EURd")[0]
-    ):
+    for a, fs in groupby(iter(paths), key=lambda path: str(path).partition("EURd")[0]):
         yield Mapping(Path(a), fs)
 
 

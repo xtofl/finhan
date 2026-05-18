@@ -86,9 +86,7 @@ def main():
     pyplot.show()
 
 
-def create_plots(
-    current_balance, transactions_by_account, show_transactions
-) -> Plots:
+def create_plots(current_balance, transactions_by_account, show_transactions) -> Plots:
     print(current_balance)
     account_plots = tuple(
         plot_each_account(
@@ -127,9 +125,7 @@ def plot_for_account(account, transactions, show_transactions) -> Plot:
         label=f"balance {account.id_} ({account.name})",
     )[0]
     if show_transactions:
-        pyplot.plot_date(
-            dates, numbers, "+", label=account.id_, color=line.get_color()
-        )
+        pyplot.plot_date(dates, numbers, "+", label=account.id_, color=line.get_color())
     return Plot(dates=dates, balance=balance)
 
 

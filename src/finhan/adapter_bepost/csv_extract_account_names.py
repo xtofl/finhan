@@ -55,9 +55,7 @@ def main():
     yaml.safe_dump(
         {
             "schema": "v1",
-            "accounts": tuple(
-                {"id": k, "name": v} for k, v in acc if any(v.strip())
-            ),
+            "accounts": tuple({"id": k, "name": v} for k, v in acc if any(v.strip())),
         },
         sys.stdout,
     )

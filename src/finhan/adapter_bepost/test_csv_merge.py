@@ -81,8 +81,7 @@ def _read_csv(sample_file):
 
 def _write_samples(account_id, samples):
     source_files = {
-        (Path(f"{account_id}{i}.csv"), sample)
-        for i, sample in enumerate(samples)
+        (Path(f"{account_id}{i}.csv"), sample) for i, sample in enumerate(samples)
     }
     for path, sample in source_files:
         with open(path, "w") as f:
